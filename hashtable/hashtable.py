@@ -8,6 +8,7 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -22,7 +23,16 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
-        self.capacity = [0] * MIN_CAPACITY
+
+        # If the capacity is less that the minimum capacity limit
+        if capacity > MIN_CAPACITY:
+            # Set the capacity to the minimum
+            self.capacity = MIN_CAPACITY
+        # Otherwise, set the intended capacity
+        else:
+            self.capacity = capacity
+        # Creates an empty hash table at the minimum capacity
+        self.data = [None] * self.capacity
 
     def get_num_slots(self):
         """
@@ -35,169 +45,146 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.capacity)
-h = HashTable([])
-print(h.get_num_slots())
 
-#     def get_load_factor(self):
-#         """
-#         Return the load factor for this hash table.
+        return self.capacity
 
-#         Implement this.
-#         """
-#         # Your code here
+    def get_load_factor(self):
+        """
+        Return the load factor for this hash table.
 
-#     def fnv1(self, key):
-#         """
-#         FNV-1 Hash, 64-bit
+        Implement this.
+        """
+        # Your code here
 
-#         Implement this, and/or DJB2.
-#         """
+    def fnv1(self, key):
+        """
+        FNV-1 Hash, 64-bit
 
-#         # Your code here
+        Implement this, and/or DJB2.
+        """
 
-#     def djb2(self, key):
-#         """
-#         DJB2 hash, 32-bit
+        # Your code here
+        hash = 0xcbf29ce484222325
+        fnv_prime = 0x100000001b3
+        key_bytes = key.encode()
+        for c in key_bytes:
+            hash = hash * fnv_prime
+            hash = hash ^ c
+        return hash & 0xffffffffffffffff
 
-#         Implement this, and/or FNV-1.
-#         """
-#         # Your code here
+    def djb2(self, key):
+        """
+        DJB2 hash, 32-bit
 
-#     def hash_index(self, key):
-#         """
-#         Take an arbitrary key and return a valid integer index
-#         between within the storage capacity of the hash table.
-#         """
-#         # return self.fnv1(key) % self.capacity
-#         return self.djb2(key) % self.capacity
+        Implement this, and/or FNV-1.
+        """
+        # Your code here
 
-#     def put(self, key, value):
-#         """
-#         Store the value with the given key.
+        # Set an original hash value (number of times hashed)
+        # 5381 is the traditionally-used value
+        # hash = 5381
 
-#         Hash collisions should be handled with Linked List Chaining.
+        # # Loop through the key
+        # for x in key:
+        #     # Hash each value
+        #         # hash << 5 = hash value's bits shifted to the left 5 places
+        #         # ord(x) = The integer value representing x's Unicode character
+        #     hash = ((hash << 5) + hash) + ord(x)
 
-#         Implement this.
-#         """
-#         # Your code here
+        # # Return the new hash value at 32 bits
+        # return hash & 0xFFFFFFFFFFFFFFFF
 
-#     def delete(self, key):
-#         """
-#         Remove the value stored with the given key.
+    def hash_index(self, key):
+        """
+        Take an arbitrary key and return a valid integer index
+        between within the storage capacity of the hash table.
+        """
+        return self.fnv1(key) % self.capacity
+        # return self.djb2(key) % self.capacity
 
-#         Print a warning if the key is not found.
+    def put(self, key, value):
+        """
+        Store the value with the given key.
 
-#         Implement this.
-#         """
-#         # Your code here
+        Hash collisions should be handled with Linked List Chaining.
 
-#     def get(self, key):
-#         """
-#         Retrieve the value stored with the given key.
+        Implement this.
+        """
+        # Your code here
+        index = self.hash_index(key)
+        self.data[index] = value
 
-#         Returns None if the key is not found.
+    def delete(self, key):
+        """
+        Remove the value stored with the given key.
 
-#         Implement this.
-#         """
-#         # Your code here
+        Print a warning if the key is not found.
 
-#     def resize(self, new_capacity):
-#         """
-#         Changes the capacity of the hash table and
-#         rehashes all key/value pairs.
+        Implement this.
+        """
+        # Your code here
+        index = self.hash_index(key)
+        if self.data[index] is None:
+            print("key is not found")
 
-#         Implement this.
-#         """
-#         # Your code here
+        self.data[index] = None
 
+    def get(self, key):
+        """
+        Retrieve the value stored with the given key.
 
-# if __name__ == "__main__":
-#     ht = HashTable(8)
+        Returns None if the key is not found.
 
-#     ht.put("line_1", "'Twas brillig, and the slithy toves")
-#     ht.put("line_2", "Did gyre and gimble in the wabe:")
-#     ht.put("line_3", "All mimsy were the borogoves,")
-#     ht.put("line_4", "And the mome raths outgrabe.")
-#     ht.put("line_5", '"Beware the Jabberwock, my son!')
-#     ht.put("line_6", "The jaws that bite, the claws that catch!")
-#     ht.put("line_7", "Beware the Jubjub bird, and shun")
-#     ht.put("line_8", 'The frumious Bandersnatch!"')
-#     ht.put("line_9", "He took his vorpal sword in hand;")
-#     ht.put("line_10", "Long time the manxome foe he sought--")
-#     ht.put("line_11", "So rested he by the Tumtum tree")
-#     ht.put("line_12", "And stood awhile in thought.")
+        Implement this.
+        """
+        # Your code here
+        index = self.hash_index(key)
+        if self.data[index] is None:
+            return None
 
-#     print("")
+        return self.data[index]
 
-#     # Test storing beyond capacity
-#     for i in range(1, 13):
-#         print(ht.get(f"line_{i}"))
+    def resize(self, new_capacity):
+        """
+        Changes the capacity of the hash table and
+        rehashes all key/value pairs.
 
-#     # Test resizing
-#     old_capacity = ht.get_num_slots()
-#     ht.resize(ht.capacity * 2)
-#     new_capacity = ht.get_num_slots()
-
-#     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
-
-#     # Test if data intact after resizing
-#     for i in range(1, 13):
-#         print(ht.get(f"line_{i}"))
-
-#     print("")
+        Implement this.
+        """
+        # Your code here
 
 
-# # first we determine how large is our list
-# length_list = 8
+if __name__ == "__main__":
+    ht = HashTable(8)
 
-# # now we need to get list with available  slots in it
-# make_list = [0] * length_list
+    ht.put("line_1", "'Twas brillig, and the slithy toves")
+    ht.put("line_2", "Did gyre and gimble in the wabe:")
+    ht.put("line_3", "All mimsy were the borogoves,")
+    ht.put("line_4", "And the mome raths outgrabe.")
+    ht.put("line_5", '"Beware the Jabberwock, my son!')
+    ht.put("line_6", "The jaws that bite, the claws that catch!")
+    ht.put("line_7", "Beware the Jubjub bird, and shun")
+    ht.put("line_8", 'The frumious Bandersnatch!"')
+    ht.put("line_9", "He took his vorpal sword in hand;")
+    ht.put("line_10", "Long time the manxome foe he sought--")
+    ht.put("line_11", "So rested he by the Tumtum tree")
+    ht.put("line_12", "And stood awhile in thought.")
 
-# # hash function that takes any type of data and return numbers
-# # the number is byte that we get through convert the data to number
-# # through using the built-in function in python .encode()
+    print("")
 
+    # Test storing beyond capacity
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
-# def hash_function(any_type_of_data):
-#     convert_to_byte = any_type_of_data.encode()
-#     # we need to the total of that data
-#     total = 0
-#     for byte in convert_to_byte:
-#         total += byte
+    # Test resizing
+    old_capacity = ht.get_num_slots()
+    ht.resize(ht.capacity * 2)
+    new_capacity = ht.get_num_slots()
 
-#     return total
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-# # how to get the index of an item in the list
-# # python has something called modole which returns the remainder of dividing
-# # the right operand on the left operand and should be less the number of
-# # length of the list
+    # Test if data intact after resizing
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
-
-# def get_index(s):
-#     hash_value = hash_function(s)
-#     return hash_value % length_list
-
-# # now how to plant an item in the list
-
-
-# def put(k, v):
-#     # first we need to get the index of the value
-#     index = get_index(k)
-#     # second we need to insert the value into that index
-#     make_list[index] = v
-# print(make_list)
-# put("Yasir" , "33798247")
-
-# def get(s):
-#     index = get_index(s)
-#     return make_list[index]
-
-# def delete(s):
-#     index = get_index(s)
-#     del make_list[index]
-#     return
-
-# print(make_list)
-# delete("Yasir")
-# print(make_list)
+    print("")
